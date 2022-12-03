@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+
+        "noImplicitAny": false,
+        "target": "es5",
+        "jsx": "react",
+
+        "module": "esnext",
+
+        "moduleResolution": "node",
+        "baseUrl": "./",
+        "lib": ["dom", "esnext"],
+        "sourceMap": true,
+        "outDir": "./public",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+
+        "paths": {
+            "src/*": ["src/*"]
+        },
+
+        "strict": true,
+        "noImplicitAny": true,
+        "skipLibCheck": true
+    }
+}
