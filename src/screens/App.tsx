@@ -3,7 +3,7 @@
 
 import React from 'react'
 
-import { Menu, Copy, Delete, Edit, Feather, Gift, Trash2 } from 'react-feather'
+import { Menu, Copy, Briefcase, Edit, Feather, Gift, Trash2, Command, GitHub } from 'react-feather'
 
 
 import Button from 'src/components/Button'
@@ -26,7 +26,8 @@ import type { ButtonProps } from 'src/components/Button'
 
 const MainBlock = styled.section`
     height: 98vh;
-    width: 98vw;
+    width: 145em;
+    padding: 1em;
 `
 
 
@@ -112,7 +113,7 @@ const App = (): JSX.Element => {
 
             default:
 
-                setTitle(name)
+                setTitle(`${name?.toLocaleUpperCase()}`)
         }
     }
 
@@ -134,36 +135,53 @@ const App = (): JSX.Element => {
 
             <WrapperTop>
 
-                <DropdownMenu
+                <DropdownMenu<ButtonProps>
                     target={<Button icon={<Menu />} />}
                     menuItems={menuItems}
                 />
 
 
+                <DropdownMenu<ButtonProps>
+                    target={<Button icon={<Command />} />}
+                />
 
 
-                <DropdownMenu
-                    target={<Button icon={<Menu />} />}
+                <DropdownMenu<ButtonProps>
+                    target={<Button icon={<GitHub />} />}
+                />
+
+
+                <DropdownMenu<ButtonProps>
+                    target={<Button icon={<Briefcase />} />}
+                    menuItems={menuItems}
                 />
 
             </WrapperTop>
 
 
-            <SpaceBlock title={title} />
+            <SpaceBlock height={97} title={title} />
 
 
             <WrapperTop>
 
-                <DropdownMenu
-                    target={<Button icon={<Menu />} />}
+                <DropdownMenu<ButtonProps>
+                    target={<Button icon={<GitHub />} />}
                 />
 
 
+                <DropdownMenu<ButtonProps>
+                    target={<Button icon={<Briefcase />} />}
+                    menuItems={menuItems}
+                />
 
-
-                <DropdownMenu
+                <DropdownMenu<ButtonProps>
                     target={<Button icon={<Menu />} />}
                     menuItems={menuItems}
+                />
+
+
+                <DropdownMenu<ButtonProps>
+                    target={<Button icon={<Command />} />}
                 />
 
             </WrapperTop>

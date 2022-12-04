@@ -9,12 +9,13 @@ import styled from 'styled-components'
 
 
 interface SpaceProps {
-    title: string
+    title?: string
     className?: string
+    height?: number
 }
 
 
-const Space: React.FC<SpaceProps> = ({ title, className }) => {
+const Space: React.FC<SpaceProps> = ({ title = '', className }) => {
 
     return <div className={className}>
         {title}
@@ -23,13 +24,11 @@ const Space: React.FC<SpaceProps> = ({ title, className }) => {
 
 
 const SpaceBlock = styled(Space)`
-    height: 33em;
+    height: ${(props: SpaceProps) => props.height ? props.height : 37}em;
 
     display: flex;
     align-items: center;
     justify-content: center;
-
-    font-family: 'Montserrat', sans-serif;
 `
 
 
