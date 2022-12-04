@@ -4,7 +4,9 @@
 import React from 'react'
 
 
-import { DROPDOWN_MENU_POPUP_WIDTH } from 'src/constants/main'
+import { DROPDOWN_MENU_POPUP_MARGIN, DROPDOWN_MENU_POPUP_WIDTH, SCROLL_BAR_SIZE } from 'src/constants/main'
+
+import { checkScrollbars } from 'src/utils/main'
 
 
 import styled from 'styled-components'
@@ -16,15 +18,15 @@ import PortalWrapper from 'src/components/PortalWrapper'
 
 
 
+
+
 const DropdownMenuPopup = styled.section`
     width: ${DROPDOWN_MENU_POPUP_WIDTH}px;
-
-    font-family: 'Montserrat', sans-serif;
 
     position: absolute;
     border: 1px solid #666;
     border-radius: 5px;
-    margin: 5px;
+    margin: ${DROPDOWN_MENU_POPUP_MARGIN}px;
     padding: 10px;
 
     background: #fff;
@@ -46,9 +48,8 @@ const DropdownMenuWrapper = styled.section`
 
 
 enum MOUSE_EVENT {
-    MOUSEOVER = 'mouseover',
-    MOUSEOUT = 'mouseout',
-    CLICK = 'click'
+    CLICK = 'click',
+    SCROLL = 'scroll'
 }
 
 
@@ -69,10 +70,14 @@ const DefaultMenuBlock = (): JSX.Element => {
 
 
 
+interface TargetBlockProps {
+    onClick?: React.MouseEventHandler
+}
 
 
 
-const DropdownMenu = (props: DropdownMenuProps): JSX.Element => {
+
+function DropdownMenu<TargetProps extends TargetBlockProps>(props: DropdownMenuProps): JSX.Element {
 
     const { target, menuItems = [(<DefaultMenuBlock key={'menu-item-block'} />)]} = props
 
@@ -82,105 +87,142 @@ const DropdownMenu = (props: DropdownMenuProps): JSX.Element => {
     const [show, setShow] = React.useState<boolean>(false)
     const [popupStyle, setPopupStyle] = React.useState<React.CSSProperties>({})
 
+    // const [wasOut, setWasOut] = React.useState<boolean>(false)
+    const [visible, setVisible] = React.useState<boolean>(true)
 
 
-    const handleMouseEvent = (event: MouseEvent): void => {
-
-        const { type, target } = event ?? {}
-        const style: React.CSSProperties = calculatePopupPosition()
 
 
-        switch (type) {
+    const handleMouseEvent = (event: Event): void => {
 
-            case MOUSE_EVENT.MOUSEOVER:
+        const { offsetX, offsetY } = (event as MouseEvent) ?? {}
+        const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = (wrapper.current as HTMLElement) ?? {}
 
-                setPopupStyle(style)
-                setShow(true)
+        const condition = !(((offsetX > offsetLeft) && (offsetX < offsetLeft + offsetWidth))
+        && ((offsetY > offsetTop) && (offsetY < offsetTop + offsetHeight)))
 
-                break
 
-            case MOUSE_EVENT.MOUSEOUT:
+        if (condition) {
 
-                setShow(false)
+            setShow(false)
+        }
+    }
 
-                break
 
-            case MOUSE_EVENT.CLICK:
+    const getViewPortCondition = (element: HTMLElement): boolean => {
 
-                if (!(target as HTMLElement)?.closest('button')) {
+        const { top, left, bottom, right } = element.getBoundingClientRect()
 
-                    setShow(false)
-                }
+        const windowHeight = (window.innerHeight || document.documentElement.clientHeight)
+        const windowWidth = (window.innerWidth || document.documentElement.clientWidth)
 
-                break
+
+        const condition = (top < 0) || (left < 0) || (bottom > windowHeight) || (right > windowWidth)
+
+        return condition
+    }
+
+
+    const handleScroll = (): void => {
+
+        const wrapperCondition = getViewPortCondition(wrapper.current as HTMLElement)
+
+        if (wrapperCondition) {
+
+            setVisible(false)
+        } else {
+
+            setVisible(true)
         }
     }
 
 
     React.useEffect(() => {
 
-        wrapper.current?.addEventListener(MOUSE_EVENT.MOUSEOVER, handleMouseEvent)
-        wrapper.current?.addEventListener(MOUSE_EVENT.MOUSEOUT, handleMouseEvent)
         document.addEventListener(MOUSE_EVENT.CLICK, handleMouseEvent)
-
+        document.addEventListener(MOUSE_EVENT.SCROLL, handleScroll)
 
         return () => {
-
-            wrapper.current?.removeEventListener(MOUSE_EVENT.MOUSEOVER, handleMouseEvent)
-            wrapper.current?.removeEventListener(MOUSE_EVENT.MOUSEOUT, handleMouseEvent)
             document.removeEventListener(MOUSE_EVENT.CLICK, handleMouseEvent)
+            document.removeEventListener(MOUSE_EVENT.SCROLL, handleScroll)
         }
     }, [target])
 
 
 
 
-    function calculatePopupPosition(): React.CSSProperties {
+    const calculatePopupPosition = (event: React.MouseEvent): React.CSSProperties => {
 
-        const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = (wrapper.current as HTMLElement) ?? {}
+        const { clientX = 0, clientY = 0, pageX = 0, pageY = 0 } = event
+        const { offsetHeight: height, offsetLeft, offsetTop } = (wrapper.current as HTMLElement)
+
+        const offsetY = pageY - clientY
+        const offsetX = pageX - clientX
+
+        const y = offsetTop - offsetY
+        const x = offsetLeft - offsetX
+
+        const windowHeight = (window.innerHeight || document.documentElement.clientHeight)
+        const windowWidth = (window.innerWidth || document.documentElement.clientWidth)
+
+        const { horizontal, vertical } = checkScrollbars()
+
 
         const position: React.CSSProperties = {
-            top: offsetTop,
-            left: offsetWidth + offsetLeft
+            top: y + height - DROPDOWN_MENU_POPUP_MARGIN * 2 + offsetY,
+            left: x + offsetX
         }
 
-        if ((offsetWidth + offsetLeft) > window.innerWidth - DROPDOWN_MENU_POPUP_WIDTH) {
+        if (x > windowWidth - DROPDOWN_MENU_POPUP_WIDTH) {
 
-            position.left = offsetLeft - offsetWidth / 2 - DROPDOWN_MENU_POPUP_WIDTH
+            position.left = x - DROPDOWN_MENU_POPUP_WIDTH + offsetX + DROPDOWN_MENU_POPUP_MARGIN + (vertical ? SCROLL_BAR_SIZE : 0)
         }
 
-        if ((offsetHeight + offsetTop) > window.innerHeight - DROPDOWN_MENU_POPUP_WIDTH) {
+        if (y > windowHeight - DROPDOWN_MENU_POPUP_WIDTH) {
 
             delete position.top
-            position.bottom = window.innerHeight - offsetTop - offsetHeight
+            position.bottom = windowHeight - y - DROPDOWN_MENU_POPUP_MARGIN * 2 - offsetY - (horizontal ? SCROLL_BAR_SIZE : 0)
         }
 
         return position
     }
 
 
+    const preparePopup = (event: React.MouseEvent): void => {
 
-    const handleClick: React.MouseEventHandler<Element> = () => {
-
-        setShow((prevState: boolean) => !prevState)
-
-        const style: React.CSSProperties = calculatePopupPosition()
+        const style: React.CSSProperties = calculatePopupPosition(event)
 
         setPopupStyle(style)
     }
 
 
+    const handleClick: React.MouseEventHandler<Element> = (event) => {
 
-    const TargetBlock: React.FC = (props) => {
+        setShow((prevState: boolean) => {
 
-        return React.cloneElement(target, {
-            ...target.props,
-            ...props,
-            onClick: (event: React.MouseEvent<Element>) => {
+            const newState = !prevState
 
-                handleClick(event)
+            if (newState) {
+
+                preparePopup(event)
+                // setWasOut(false)
             }
+
+            return newState
         })
+    }
+
+
+
+    const TargetBlock = (): JSX.Element => {
+
+
+        const clonesProps: TargetProps = {
+            ...target.props,
+            onClick: handleClick
+        }
+
+        return React.cloneElement(target, clonesProps)
     }
 
 
@@ -193,6 +235,7 @@ const DropdownMenu = (props: DropdownMenuProps): JSX.Element => {
                 onClick: (event: React.MouseEvent<Element>) => {
 
                     setShow(false)
+                    // setWasOut(true)
                     item.props.onClick(event)
                 }
             }))
@@ -201,10 +244,36 @@ const DropdownMenu = (props: DropdownMenuProps): JSX.Element => {
 
 
 
-    return (<DropdownMenuWrapper ref={wrapper}>
+    // const handleMouseOver: React.MouseEventHandler<HTMLElement> = () => {
+
+    //     if (wasOut) {
+
+    //         preparePopup()
+
+    //         setShow(true)
+    //         setWasOut(false)
+    //     }
+    // }
+
+    // const handleMouseOut: React.MouseEventHandler<HTMLElement> = (event) => {
+
+    //     const { target } = event
+
+    //     if (target == wrapper.current) {
+
+    //         setWasOut(true)
+    //     }
+    // }
 
 
-        {show && <PortalWrapper>
+    return (<DropdownMenuWrapper
+        // onMouseOver={handleMouseOver}
+        // onMouseOut={handleMouseOut}
+        ref={wrapper}
+    >
+
+
+        {show && visible && <PortalWrapper>
 
             <DropdownMenuPopup style={popupStyle}>
 
