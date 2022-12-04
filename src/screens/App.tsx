@@ -26,7 +26,7 @@ import type { ButtonProps } from 'src/components/Button'
 
 const MainBlock = styled.section`
     height: 98vh;
-    width: 145em;
+    width: 97em;
     padding: 1em;
 `
 
@@ -159,7 +159,7 @@ const App = (): JSX.Element => {
             </WrapperTop>
 
 
-            <SpaceBlock height={97} title={title} />
+            <SpaceBlock height={68} title={title} />
 
 
             <WrapperTop>
