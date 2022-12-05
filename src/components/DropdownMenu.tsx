@@ -87,7 +87,6 @@ function DropdownMenu<TargetProps extends TargetBlockProps>(props: DropdownMenuP
     const [show, setShow] = React.useState<boolean>(false)
     const [popupStyle, setPopupStyle] = React.useState<React.CSSProperties>({})
 
-    // const [wasOut, setWasOut] = React.useState<boolean>(false)
     const [visible, setVisible] = React.useState<boolean>(true)
 
 
@@ -205,7 +204,6 @@ function DropdownMenu<TargetProps extends TargetBlockProps>(props: DropdownMenuP
             if (newState) {
 
                 preparePopup(event)
-                // setWasOut(false)
             }
 
             return newState
@@ -235,7 +233,6 @@ function DropdownMenu<TargetProps extends TargetBlockProps>(props: DropdownMenuP
                 onClick: (event: React.MouseEvent<Element>) => {
 
                     setShow(false)
-                    // setWasOut(true)
                     item.props.onClick(event)
                 }
             }))
@@ -244,34 +241,8 @@ function DropdownMenu<TargetProps extends TargetBlockProps>(props: DropdownMenuP
 
 
 
-    // const handleMouseOver: React.MouseEventHandler<HTMLElement> = () => {
 
-    //     if (wasOut) {
-
-    //         preparePopup()
-
-    //         setShow(true)
-    //         setWasOut(false)
-    //     }
-    // }
-
-    // const handleMouseOut: React.MouseEventHandler<HTMLElement> = (event) => {
-
-    //     const { target } = event
-
-    //     if (target == wrapper.current) {
-
-    //         setWasOut(true)
-    //     }
-    // }
-
-
-    return (<DropdownMenuWrapper
-        // onMouseOver={handleMouseOver}
-        // onMouseOut={handleMouseOut}
-        ref={wrapper}
-    >
-
+    return (<DropdownMenuWrapper ref={wrapper}>
 
         {show && visible && <PortalWrapper>
 
