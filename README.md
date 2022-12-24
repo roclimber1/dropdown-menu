@@ -20,4 +20,4 @@ npm run build
 
 #### Результат можно посмотреть здесь (See result here)
 
-[Click here](https://roclimber1.github.io)
+[Click here](https://roclimber1.github.io/pages/dropdown/index.html)
